@@ -23,10 +23,9 @@ class RPCClient(object):
             traceback.print_exc()
 
     def send_message(self, message):
-        print(message)
         self.channel.basic_publish(exchange=self.exchange,
                                    routing_key=self.topic,
-                                   body=json.dumps(message))
+                                   body=json.dumps(message).encode('utf-8'))
 
 
     def __getattr__(self, name):
@@ -37,9 +36,11 @@ class RPCClient(object):
                 'kwargs': kwargs
             }
             self.send_message(message)
+        call.__name__ = name
         return call
 
 if __name__ == '__main__':
     client = RPCClient(config.TRANSPORT, config.EXCHANGE, config.TOPIC)
     client.prepare()
+    client.sub(1, 2)
     client.add(1, 2)
